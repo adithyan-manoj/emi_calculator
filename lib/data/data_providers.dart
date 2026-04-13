@@ -34,13 +34,16 @@ class AppState {
   }
 }
 
-class AppStateNotifier extends StateNotifier<AppState> {
-  AppStateNotifier() : super(AppState(
-    offices: List.from(DummyData.offices),
-    customers: List.from(DummyData.customers),
-    loans: List.from(DummyData.loans),
-    monthlyRecoveries: List.from(DummyData.monthlyRecoveries),
-  ));
+class AppStateNotifier extends Notifier<AppState> {
+  @override
+  AppState build() {
+    return AppState(
+      offices: List.from(DummyData.offices),
+      customers: List.from(DummyData.customers),
+      loans: List.from(DummyData.loans),
+      monthlyRecoveries: List.from(DummyData.monthlyRecoveries),
+    );
+  }
 
   void addBranch(String name) {
     if (name.trim().isEmpty) return;
@@ -83,4 +86,4 @@ class AppStateNotifier extends StateNotifier<AppState> {
   }
 }
 
-final appStateProvider = StateNotifierProvider<AppStateNotifier, AppState>((ref) => AppStateNotifier());
+final appStateProvider = NotifierProvider<AppStateNotifier, AppState>(AppStateNotifier.new);

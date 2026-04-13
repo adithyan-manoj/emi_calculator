@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/data_providers.dart';
+import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 
 class CustomerProfileScreen extends ConsumerWidget {
@@ -114,6 +115,7 @@ class CustomerProfileScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddLoanModal(context, ref),
