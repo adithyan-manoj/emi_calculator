@@ -49,7 +49,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                   child: GridView.builder(
                     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 400,
-                      childAspectRatio: 1.25,
+                      childAspectRatio: 1.10,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
                     ),

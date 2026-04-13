@@ -46,57 +46,6 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime(_selectedYear, _selectedMonth),
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2030),
-                    );
-                    if (date != null) {
-                      setState(() {
-                        _selectedMonth = date.month;
-                        _selectedYear = date.year;
-                      });
-                      await ref.read(appStateProvider.notifier).generateDrafts(date.month, date.year);
-                    }
-                  },
-                  icon: const Icon(Icons.sync),
-                  label: const Text('Generate Data'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppTheme.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    final office = appState.offices.firstWhere((o) => o.id == widget.branchId);
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (ctx) => PdfPreviewScreen(
-                          office: office,
-                          month: _selectedMonth,
-                          year: _selectedYear,
-                          drafts: drafts,
-                        ),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text('Generate Final PDF'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 32),
@@ -134,6 +83,68 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime(_selectedYear, _selectedMonth),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2030),
+                      );
+                      if (date != null) {
+                        setState(() {
+                          _selectedMonth = date.month;
+                          _selectedYear = date.year;
+                        });
+                        await ref.read(appStateProvider.notifier).generateDrafts(date.month, date.year);
+                      }
+                    },
+                    icon: const Icon(Icons.sync),
+                    label: const Text('Generate Data'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppTheme.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      final office = appState.offices.firstWhere((o) => o.id == widget.branchId);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (ctx) => PdfPreviewScreen(
+                            office: office,
+                            month: _selectedMonth,
+                            year: _selectedYear,
+                            drafts: drafts,
+                            customers: appState.customers,
+                            loans: appState.loans,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.picture_as_pdf),
+                    label: const Text('Generate Final PDF'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

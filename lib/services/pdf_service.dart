@@ -18,6 +18,8 @@ class PdfService {
     required int month,
     required int year,
     required List<MonthlyRecovery> drafts,
+    required List<Customer> customers,
+    required List<Loan> loans,
   }) async {
     final pdf = pw.Document();
 
@@ -70,7 +72,7 @@ class PdfService {
                 pw.SizedBox(height: 32),
               ],
             ),
-            _buildDataTable(drafts),
+            _buildDataTable(drafts, customers, loans),
           ];
         },
       ),
@@ -79,7 +81,7 @@ class PdfService {
     return pdf.save();
   }
 
-  static pw.Widget _buildDataTable(List<MonthlyRecovery> drafts) {
+  static pw.Widget _buildDataTable(List<MonthlyRecovery> drafts, List<Customer> customers, List<Loan> loans) {
     final tableHeaders = [
       'Memo\nNo.', 'Name', 'Account\nNo.', 'Principal\nOutstanding', 
       'Principal\nDue', 'EMI', 'Interest', 'Penal\nInt', 'Notice',
@@ -87,8 +89,8 @@ class PdfService {
     ];
 
     final tableData = drafts.map((draft) {
-      final loan = DummyData.loans.firstWhere((l) => l.id == draft.loanId);
-      final customer = DummyData.customers.firstWhere((c) => c.id == loan.customerId);
+      final loan = loans.firstWhere((l) => l.id == draft.loanId);
+      final customer = customers.firstWhere((c) => c.id == loan.customerId);
       
       final emi = draft.principalDue + draft.interest;
       final total = emi + draft.penalInterest + draft.otherCharges;

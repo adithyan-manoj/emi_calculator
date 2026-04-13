@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:loan_recovery/models/customer.dart';
+import 'package:loan_recovery/models/loan.dart';
 import 'package:printing/printing.dart';
 import '../services/pdf_service.dart';
 import '../models/monthly_recovery.dart';
@@ -11,6 +13,8 @@ class PdfPreviewScreen extends StatelessWidget {
   final int month;
   final int year;
   final List<MonthlyRecovery> drafts;
+  final List<Customer> customers;
+  final List<Loan> loans;
 
   const PdfPreviewScreen({
     super.key,
@@ -18,6 +22,8 @@ class PdfPreviewScreen extends StatelessWidget {
     required this.month,
     required this.year,
     required this.drafts,
+    required this.customers,
+    required this.loans,
   });
 
   @override
@@ -36,6 +42,8 @@ class PdfPreviewScreen extends StatelessWidget {
           month: month,
           year: year,
           drafts: drafts,
+          customers: customers,
+          loans: loans,
         ),
         allowPrinting: true,
         allowSharing: true,
