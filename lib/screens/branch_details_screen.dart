@@ -85,14 +85,43 @@ class BranchDetailsScreen extends ConsumerWidget {
                                   Text('Member No: ${customer.memberNo}', style: Theme.of(context).textTheme.bodyMedium),
                                 ],
                               ),
-                              ElevatedButton(
-                                onPressed: () => context.push('/customer/${customer.id}'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: AppTheme.primary,
-                                  elevation: 0,
-                                ),
-                                child: const Text('View Details'),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          backgroundColor: AppTheme.surface,
+                                          title: const Text('Delete Employee?'),
+                                          content: Text('Are you sure you want to delete ${customer.name}? This will remove all their active loans.'),
+                                          actions: [
+                                            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                                              onPressed: () {
+                                                ref.read(appStateProvider.notifier).deleteEmployee(customer.id);
+                                                Navigator.pop(ctx);
+                                              },
+                                              child: const Text('Delete'),
+                                            ),
+                                          ],
+                                        )
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton(
+                                    onPressed: () => context.push('/customer/${customer.id}'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                      foregroundColor: AppTheme.primary,
+                                      elevation: 0,
+                                    ),
+                                    child: const Text('View Details'),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

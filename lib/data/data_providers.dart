@@ -70,6 +70,14 @@ class AppStateNotifier extends AsyncNotifier<AppState> {
     ));
   }
 
+  Future<void> deleteBranch(String officeId) async {
+    final api = ref.read(apiServiceProvider);
+    await api.deleteOffice(officeId);
+    state = state.whenData((current) => current.copyWith(
+      offices: current.offices.where((o) => o.id != officeId).toList()
+    ));
+  }
+
   Future<void> addEmployee(String branchId, String name, String memberNo) async {
     if (name.trim().isEmpty || memberNo.trim().isEmpty) return;
     
@@ -80,6 +88,14 @@ class AppStateNotifier extends AsyncNotifier<AppState> {
 
     state = state.whenData((current) => current.copyWith(
       customers: [...current.customers, savedCustomer]
+    ));
+  }
+
+  Future<void> deleteEmployee(String customerId) async {
+    final api = ref.read(apiServiceProvider);
+    await api.deleteCustomer(customerId);
+    state = state.whenData((current) => current.copyWith(
+      customers: current.customers.where((c) => c.id != customerId).toList()
     ));
   }
 
@@ -99,9 +115,26 @@ class AppStateNotifier extends AsyncNotifier<AppState> {
     ));
   }
 
-  Future<void> updateDraft(String draftId, double penalInt, double others) async {
+  Future<void> deleteLoan(String loanId) async {
     final api = ref.read(apiServiceProvider);
-    final updatedDraft = await api.updateRecovery(draftId, penalInt, others);
+    await api.deleteLoan(loanId);
+    state = state.whenData((current) => current.copyWith(
+      loans: current.loans.where((l) => l.id != loanId).toList()
+    ));
+  }
+
+  Future<void> updateDraft(
+    String draftId, 
+    {double? principalDue, double? interest, double? penalInt, double? others}
+  ) async {
+    final api = ref.read(apiServiceProvider);
+    final updatedDraft = await api.updateRecovery(
+      draftId, 
+      principalDue: principalDue, 
+      interest: interest, 
+      penalInt: penalInt, 
+      others: others
+    );
 
     state = state.whenData((current) {
       final index = current.monthlyRecoveries.indexWhere((d) => d.id == draftId);
@@ -112,6 +145,15 @@ class AppStateNotifier extends AsyncNotifier<AppState> {
       }
       return current;
     });
+  }
+
+  Future<void> generateDrafts(int month, int year) async {
+    final api = ref.read(apiServiceProvider);
+    await api.generateDrafts(month, year);
+    
+    // Refresh recoveries
+    final recoveries = await api.getRecoveries();
+    state = state.whenData((current) => current.copyWith(monthlyRecoveries: recoveries));
   }
 }
 

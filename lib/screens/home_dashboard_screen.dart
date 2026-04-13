@@ -82,7 +82,35 @@ class HomeDashboardScreen extends ConsumerWidget {
                                     '$employeeCount Employees',
                                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                                   ),
-                                  const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textSecondary),
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (ctx) => AlertDialog(
+                                              backgroundColor: AppTheme.surface,
+                                              title: const Text('Delete Branch?'),
+                                              content: Text('Are you sure you want to delete ${branch.name}? This will remove all employees and loans inside it.'),
+                                              actions: [
+                                                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+                                                ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                                                  onPressed: () {
+                                                    ref.read(appStateProvider.notifier).deleteBranch(branch.id);
+                                                    Navigator.pop(ctx);
+                                                  },
+                                                  child: const Text('Delete'),
+                                                ),
+                                              ],
+                                            )
+                                          );
+                                        },
+                                      ),
+                                      const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textSecondary),
+                                    ],
+                                  ),
                                 ],
                               )
                             ],

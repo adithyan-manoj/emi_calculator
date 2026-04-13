@@ -88,26 +88,55 @@ class CustomerProfileScreen extends ConsumerWidget {
                           child: GlassCard(
                             padding: const EdgeInsets.all(24),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Account No: ${loan.accountNo}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                    const SizedBox(height: 8),
-                                    Text('Status: ${loan.status}'),
-                                  ],
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text('Principal O/S: ₹${loan.principalOutstanding}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                    const SizedBox(height: 8),
-                                    Text('Base EMI: ₹${loan.baseEmiAmount}', style: const TextStyle(color: AppTheme.primary)),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Account No: ${loan.accountNo}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                      const SizedBox(height: 8),
+                                      Text('Status: ${loan.status}'),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Text('Principal O/S: ₹${loan.principalOutstanding}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                          const SizedBox(height: 8),
+                                          Text('Base EMI: ₹${loan.baseEmiAmount}', style: const TextStyle(color: AppTheme.primary)),
+                                        ],
+                                      ),
+                                      const SizedBox(width: 8),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (ctx) => AlertDialog(
+                                              backgroundColor: AppTheme.surface,
+                                              title: const Text('Delete Loan?'),
+                                              content: const Text('Are you sure you want to delete this loan account?'),
+                                              actions: [
+                                                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+                                                ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                                                  onPressed: () {
+                                                    ref.read(appStateProvider.notifier).deleteLoan(loan.id);
+                                                    Navigator.pop(ctx);
+                                                  },
+                                                  child: const Text('Delete'),
+                                                ),
+                                              ],
+                                            )
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                           ),
                         );
                       },

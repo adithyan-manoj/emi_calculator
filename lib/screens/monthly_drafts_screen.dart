@@ -16,9 +16,8 @@ class MonthlyDraftsScreen extends ConsumerStatefulWidget {
 }
 
 class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
-  // Current mocked month
-  final int _selectedMonth = 4;
-  final int _selectedYear = 2026;
+  int _selectedMonth = 4;
+  int _selectedYear = 2026;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +46,33 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime(_selectedYear, _selectedMonth),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2030),
+                    );
+                    if (date != null) {
+                      setState(() {
+                        _selectedMonth = date.month;
+                        _selectedYear = date.year;
+                      });
+                      await ref.read(appStateProvider.notifier).generateDrafts(date.month, date.year);
+                    }
+                  },
+                  icon: const Icon(Icons.sync),
+                  label: const Text('Generate Data'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppTheme.primary,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () {
                     final office = appState.offices.firstWhere((o) => o.id == widget.branchId);
@@ -142,6 +168,8 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
   }
 
   void _showEditModal(BuildContext context, WidgetRef ref, MonthlyRecovery draft, String customerName) {
+    final principalCtrl = TextEditingController(text: draft.principalDue.toString());
+    final interestCtrl = TextEditingController(text: draft.interest.toString());
     final penalCtrl = TextEditingController(text: draft.penalInterest.toString());
     final othersCtrl = TextEditingController(text: draft.otherCharges.toString());
     
@@ -150,12 +178,16 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
         title: Text('Edit Recovery: $customerName'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: penalCtrl, decoration: const InputDecoration(labelText: 'Penal Interest'), keyboardType: TextInputType.number),
-            TextField(controller: othersCtrl, decoration: const InputDecoration(labelText: 'Other Charges'), keyboardType: TextInputType.number),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: principalCtrl, decoration: const InputDecoration(labelText: 'Principal Due'), keyboardType: TextInputType.number),
+              TextField(controller: interestCtrl, decoration: const InputDecoration(labelText: 'Interest'), keyboardType: TextInputType.number),
+              TextField(controller: penalCtrl, decoration: const InputDecoration(labelText: 'Penal Interest'), keyboardType: TextInputType.number),
+              TextField(controller: othersCtrl, decoration: const InputDecoration(labelText: 'Other Charges'), keyboardType: TextInputType.number),
+            ],
+          ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
@@ -163,8 +195,10 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
             onPressed: () {
               ref.read(appStateProvider.notifier).updateDraft(
                 draft.id, 
-                double.tryParse(penalCtrl.text) ?? 0.0,
-                double.tryParse(othersCtrl.text) ?? 0.0,
+                principalDue: double.tryParse(principalCtrl.text) ?? 0.0,
+                interest: double.tryParse(interestCtrl.text) ?? 0.0,
+                penalInt: double.tryParse(penalCtrl.text) ?? 0.0,
+                others: double.tryParse(othersCtrl.text) ?? 0.0,
               );
               Navigator.pop(ctx);
             },

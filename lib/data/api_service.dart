@@ -32,6 +32,10 @@ class ApiService {
     return Office.fromJson(response.data);
   }
 
+  Future<void> deleteOffice(String officeId) async {
+    await _dio.delete('/offices/$officeId');
+  }
+
   // --- Customers ---
   Future<List<Customer>> getCustomers({String? officeId}) async {
     final response = await _dio.get('/customers/', queryParameters: officeId != null ? {'office_id': officeId} : null);
@@ -41,6 +45,10 @@ class ApiService {
   Future<Customer> createCustomer(Customer customer) async {
     final response = await _dio.post('/customers/', data: customer.toJson());
     return Customer.fromJson(response.data);
+  }
+
+  Future<void> deleteCustomer(String customerId) async {
+    await _dio.delete('/customers/$customerId');
   }
 
   // --- Loans ---
@@ -54,6 +62,10 @@ class ApiService {
     return Loan.fromJson(response.data);
   }
 
+  Future<void> deleteLoan(String loanId) async {
+    await _dio.delete('/loans/$loanId');
+  }
+
   // --- Recoveries ---
   Future<List<MonthlyRecovery>> getRecoveries({int? month, int? year}) async {
     final Map<String, dynamic> query = {};
@@ -64,10 +76,23 @@ class ApiService {
     return (response.data as List).map((e) => MonthlyRecovery.fromJson(e)).toList();
   }
 
-  Future<MonthlyRecovery> updateRecovery(String id, double penalInt, double others) async {
+  Future<void> generateDrafts(int month, int year) async {
+    await _dio.post('/recoveries/generate', queryParameters: {'month': month, 'year': year});
+  }
+
+  Future<MonthlyRecovery> updateRecovery(
+    String id, 
+    {double? principalDue, double? interest, double? penalInt, double? others}
+  ) async {
+    final Map<String, dynamic> query = {};
+    if (principalDue != null) query['principal_due'] = principalDue;
+    if (interest != null) query['interest'] = interest;
+    if (penalInt != null) query['penal_interest'] = penalInt;
+    if (others != null) query['other_charges'] = others;
+
     final response = await _dio.patch(
       '/recoveries/$id', 
-      queryParameters: {'penal_interest': penalInt, 'other_charges': others}
+      queryParameters: query
     );
     return MonthlyRecovery.fromJson(response.data);
   }
