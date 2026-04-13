@@ -10,4 +10,22 @@ class Customer {
     required this.memberNo,
     required this.name,
   });
+
+  factory Customer.fromJson(Map<String, dynamic> json) {
+    return Customer(
+      id: json['id'],
+      officeId: json['office_id'],
+      memberNo: json['member_no'],
+      name: json['name'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'office_id': officeId,
+      'member_no': memberNo,
+      'name': name,
+    };
+  }
 }

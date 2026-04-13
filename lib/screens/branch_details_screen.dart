@@ -11,7 +11,7 @@ class BranchDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appState = ref.watch(appStateProvider);
+    final appState = ref.watch(appStateProvider).requireValue;
     final office = appState.offices.firstWhere((o) => o.id == branchId);
     final customers = appState.customers.where((c) => c.officeId == branchId).toList();
 

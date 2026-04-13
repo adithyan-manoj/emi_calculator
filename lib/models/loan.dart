@@ -14,4 +14,26 @@ class Loan {
     required this.baseEmiAmount,
     this.status = 'ACTIVE',
   });
+
+  factory Loan.fromJson(Map<String, dynamic> json) {
+    return Loan(
+      id: json['id'],
+      customerId: json['customer_id'],
+      accountNo: json['account_no'],
+      principalOutstanding: (json['principal_outstanding'] as num?)?.toDouble() ?? 0.0,
+      baseEmiAmount: (json['base_emi_amount'] as num?)?.toDouble() ?? 0.0,
+      status: json['status'] ?? 'ACTIVE',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'customer_id': customerId,
+      'account_no': accountNo,
+      'principal_outstanding': principalOutstanding,
+      'base_emi_amount': baseEmiAmount,
+      'status': status,
+    };
+  }
 }

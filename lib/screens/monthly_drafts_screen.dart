@@ -22,7 +22,7 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = ref.watch(appStateProvider);
+    final appState = ref.watch(appStateProvider).requireValue;
     // Filter drafts for current mocked month
     final drafts = appState.monthlyRecoveries.where((m) => m.month == _selectedMonth && m.year == _selectedYear).toList();
 
@@ -117,7 +117,7 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
   }
 
   DataRow _buildDraftRow(BuildContext context, WidgetRef ref, MonthlyRecovery draft) {
-    final appState = ref.read(appStateProvider);
+    final appState = ref.read(appStateProvider).requireValue;
     final loan = appState.loans.firstWhere((l) => l.id == draft.loanId);
     final customer = appState.customers.firstWhere((c) => c.id == loan.customerId);
 
