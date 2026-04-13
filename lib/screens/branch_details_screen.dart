@@ -30,44 +30,66 @@ class BranchDetailsScreen extends ConsumerWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
-            child: _GlassPillButton(
-              icon: Icons.picture_as_pdf_outlined,
-              label: 'Month Draft',
-              onTap: () => context.push('/branch/$branchId/drafts'),
+            child: SizedBox(
+              height: 38,
+              child: GestureDetector(
+                onTap: () => context.push('/branch/$branchId/drafts'),
+                child: const GlassPill(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.description_outlined, size: 14, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text('Drafts', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ],
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Employees',
+                    'Unit Members',
                     style: Theme.of(context)
                         .textTheme
                         .displayLarge
-                        ?.copyWith(fontSize: 28),
+                        ?.copyWith(fontSize: 30),
                   ),
-                  _AddButton(
-                    label: 'Add Employee',
-                    onTap: () => _showAddEmployeeModal(context, ref),
+                  SizedBox(
+                    height: 48,
+                    child: GestureDetector(
+                      onTap: () => _showAddEmployeeModal(context, ref),
+                      child: const GlassPill(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.person_add_alt_1_outlined, size: 18, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text('ADD', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
               Expanded(
                 child: customers.isEmpty
-                    ? _EmptyState(
-                        icon: Icons.people_outline_rounded,
-                        message: 'No employees found.',
-                        subtitle: 'Tap "Add Employee" to get started.',
+                    ? const Center(
+                        child: Text('No registered members in this unit.', style: TextStyle(color: Colors.white38)),
                       )
                     : ListView.builder(
                         physics: const BouncingScrollPhysics(),
@@ -81,108 +103,63 @@ class BranchDetailsScreen extends ConsumerWidget {
                               0.0, (sum, l) => sum + l.principalOutstanding);
 
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: 14.0),
-                            child: GlassCard(
-                              borderRadius: 20,
-                              padding: const EdgeInsets.all(18),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      // Avatar
-                                      Container(
-                                        width: 42,
-                                        height: 42,
-                                        decoration: BoxDecoration(
-                                          color:
-                                              AppTheme.primary.withOpacity(0.08),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border: Border.all(
-                                            color: AppTheme.primary
-                                                .withOpacity(0.15),
-                                            width: 1,
+                            padding: const EdgeInsets.only(bottom: 20.0),
+                            child: SizedBox(
+                              height: 140,
+                              child: GlassCard(
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withValues(alpha: 0.08),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: const Icon(Icons.person_outline_rounded, color: Colors.white),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(customer.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                                              Text('ID: ${customer.memberNo}', style: const TextStyle(fontSize: 12, color: Colors.white60)),
+                                            ],
                                           ),
                                         ),
-                                        child: const Icon(
-                                          Icons.person_outline_rounded,
-                                          size: 20,
-                                          color: AppTheme.primary,
+                                        IconButton(
+                                          icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                                          onPressed: () => _showDeleteDialog(context, ref, customer.id, customer.name),
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              customer.name,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .displayLarge
-                                                  ?.copyWith(fontSize: 16),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
+                                        const SizedBox(width: 8),
+                                        SizedBox(
+                                          height: 38,
+                                          child: GestureDetector(
+                                            onTap: () => context.push('/customer/${customer.id}'),
+                                            child: const GlassPill(
+                                              padding: EdgeInsets.symmetric(horizontal: 14),
+                                              child: Text('MANAGE', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                                             ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              'Member No: ${customer.memberNo}',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium
-                                                  ?.copyWith(fontSize: 13),
-                                            ),
-                                          ],
+                                          ),
                                         ),
-                                      ),
-                                      // Actions
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.delete_outline_rounded,
-                                          color: Colors.red.shade400,
-                                          size: 20,
-                                        ),
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(),
-                                        onPressed: () =>
-                                            _showDeleteDialog(context, ref,
-                                                customer.id, customer.name),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      _ViewDetailsButton(
-                                        onTap: () => context.push(
-                                            '/customer/${customer.id}'),
-                                      ),
-                                    ],
-                                  ),
-                                  const Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 14.0),
-                                    child: Divider(
-                                      height: 1,
-                                      color: AppTheme.divider,
+                                      ],
                                     ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      _StatChip(
-                                        label: 'Active Loans',
-                                        value: '${customerLoans.length}',
-                                      ),
-                                      const SizedBox(width: 10),
-                                      _StatChip(
-                                        label: 'Total O/S',
-                                        value:
-                                            '₹${totalOs.toStringAsFixed(0)}',
-                                        highlight: true,
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                    const Spacer(),
+                                    const Divider(color: Colors.white12, height: 1),
+                                    const Spacer(),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                      children: [
+                                        _StatItem(label: 'LOANS', value: '${customerLoans.length}'),
+                                        _StatItem(label: 'OUTSTANDING', value: '₹${totalOs.toStringAsFixed(0)}', highlight: true),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -200,58 +177,13 @@ class BranchDetailsScreen extends ConsumerWidget {
       String customerName) {
     showDialog(
       context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: GlassCard(
-          borderRadius: 24,
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Delete Employee?',
-                style: Theme.of(context)
-                    .textTheme
-                    .displayLarge
-                    ?.copyWith(fontSize: 18),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Are you sure you want to delete $customerName? This will remove all their active loans.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Cancel',
-                        style: TextStyle(color: AppTheme.textSecondary)),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                    onPressed: () {
-                      ref
-                          .read(appStateProvider.notifier)
-                          .deleteEmployee(customerId);
-                      Navigator.pop(ctx);
-                    },
-                    child: const Text('Delete'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+      builder: (ctx) => _GlassDialog(
+        title: 'Remove Member?',
+        content: 'This will purge all active loan records for $customerName. This action cannot be undone.',
+        onConfirm: () {
+          ref.read(appStateProvider.notifier).deleteEmployee(customerId);
+          Navigator.pop(ctx);
+        },
       ),
     );
   }
@@ -261,288 +193,132 @@ class BranchDetailsScreen extends ConsumerWidget {
     final memberCtrl = TextEditingController();
     showDialog(
       context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: GlassCard(
-          borderRadius: 24,
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Add New Employee',
-                style: Theme.of(context)
-                    .textTheme
-                    .displayLarge
-                    ?.copyWith(fontSize: 18),
-              ),
-              const SizedBox(height: 20),
-              _GlassTextField(controller: nameCtrl, label: 'Employee Name'),
-              const SizedBox(height: 12),
-              _GlassTextField(controller: memberCtrl, label: 'Member No.'),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Cancel',
-                        style: TextStyle(color: AppTheme.textSecondary)),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                    ),
-                    onPressed: () {
-                      ref.read(appStateProvider.notifier).addEmployee(
-                          branchId, nameCtrl.text, memberCtrl.text);
-                      Navigator.pop(ctx);
-                    },
-                    child: const Text('Save'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+      builder: (ctx) => _GlassInputDialog(
+        title: 'New Member Registration',
+        inputs: [
+          _InputDef(controller: nameCtrl, label: 'Full Official Name'),
+          _InputDef(controller: memberCtrl, label: 'Society Membership No.'),
+        ],
+        onConfirm: () {
+          ref.read(appStateProvider.notifier).addEmployee(
+              branchId, nameCtrl.text, memberCtrl.text);
+          Navigator.pop(ctx);
+        },
       ),
     );
   }
 }
 
-// ─── Small reusable sub-widgets ─────────────────────────────────────────────
-
-class _EmptyState extends StatelessWidget {
-  final IconData icon;
-  final String message;
-  final String subtitle;
-  const _EmptyState(
-      {required this.icon, required this.message, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: GlassCard(
-        borderRadius: 22,
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 40, color: AppTheme.textSecondary),
-            const SizedBox(height: 16),
-            Text(message,
-                style: Theme.of(context)
-                    .textTheme
-                    .displayLarge
-                    ?.copyWith(fontSize: 16)),
-            const SizedBox(height: 6),
-            Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatChip extends StatelessWidget {
+class _StatItem extends StatelessWidget {
   final String label;
   final String value;
   final bool highlight;
-  const _StatChip(
-      {required this.label, required this.value, this.highlight = false});
+  const _StatItem({required this.label, required this.value, this.highlight = false});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: highlight
-            ? AppTheme.accent.withOpacity(0.07)
-            : AppTheme.primary.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: highlight
-              ? AppTheme.accent.withOpacity(0.18)
-              : AppTheme.primary.withOpacity(0.10),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 15,
-              color: highlight ? AppTheme.accent : AppTheme.textPrimary,
+    return Column(
+      children: [
+        Text(value, style: TextStyle(color: highlight ? AppTheme.accent : Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+        Text(label, style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+      ],
+    );
+  }
+}
+
+class _GlassDialog extends StatelessWidget {
+  final String title;
+  final String content;
+  final VoidCallback onConfirm;
+  const _GlassDialog({required this.title, required this.content, required this.onConfirm});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: IntrinsicHeight(
+          child: GlassCard(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                Text(content, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                const SizedBox(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL', style: TextStyle(color: Colors.white54, fontSize: 12))),
+                    const SizedBox(width: 16),
+                    SizedBox(height: 40, width: 100, child: GestureDetector(onTap: onConfirm, child: const GlassPill(child: Text('PURGE', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 12))))),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AddButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  const _AddButton({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-        decoration: BoxDecoration(
-          color: AppTheme.primary,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.add_rounded, size: 17, color: Colors.white),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13),
-            ),
-          ],
         ),
       ),
     );
   }
 }
 
-class _ViewDetailsButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _ViewDetailsButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: AppTheme.primary.withOpacity(0.07),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: AppTheme.primary.withOpacity(0.15), width: 1),
-        ),
-        child: const Text(
-          'Details',
-          style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primary),
-        ),
-      ),
-    );
-  }
-}
-
-class _GlassPillButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  const _GlassPillButton(
-      {required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.6),
-          borderRadius: BorderRadius.circular(20),
-          border:
-              Border.all(color: Colors.white.withOpacity(0.8), width: 1),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 15, color: AppTheme.primary),
-            const SizedBox(width: 5),
-            Text(
-              label,
-              style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.primary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GlassTextField extends StatelessWidget {
+class _InputDef {
   final TextEditingController controller;
   final String label;
-  final TextInputType keyboardType;
-  const _GlassTextField({
-    required this.controller,
-    required this.label,
-    this.keyboardType = TextInputType.text,
-  });
+  _InputDef({required this.controller, required this.label});
+}
+
+class _GlassInputDialog extends StatelessWidget {
+  final String title;
+  final List<_InputDef> inputs;
+  final VoidCallback onConfirm;
+  const _GlassInputDialog({required this.title, required this.inputs, required this.onConfirm});
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle:
-            const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.5),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide:
-              const BorderSide(color: AppTheme.divider, width: 1),
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: IntrinsicHeight(
+          child: GlassCard(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 24),
+                ...inputs.map((i) => Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: TextField(
+                    controller: i.controller,
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    decoration: InputDecoration(
+                      labelText: i.label,
+                      labelStyle: const TextStyle(color: Colors.white38, fontSize: 12),
+                      filled: true,
+                      fillColor: Colors.white.withValues(alpha: 0.05),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                )).toList(),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL', style: TextStyle(color: Colors.white54, fontSize: 12))),
+                    const SizedBox(width: 16),
+                    SizedBox(height: 40, width: 120, child: GestureDetector(onTap: onConfirm, child: const GlassPill(child: Text('CONFIRM', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 12))))),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide:
-              const BorderSide(color: AppTheme.divider, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide:
-              const BorderSide(color: AppTheme.accent, width: 1.5),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }

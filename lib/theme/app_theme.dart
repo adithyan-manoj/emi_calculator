@@ -1,31 +1,32 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Off-white minimal color palette
-  static const Color background = Color(0xFFF4F3EF);
-  static const Color surface = Color(0xFFFAF9F6);
-  static const Color textPrimary = Color(0xFF1C1C1E);
-  static const Color textSecondary = Color(0xFF8A8A8E);
-  static const Color primary = Color(0xFF3A3A5C); // Deep slate accent
-  static const Color accent = Color(0xFF5E6AD2);   // Soft indigo
-  static const Color divider = Color(0xFFE5E5EA);
+  // Cinematic Forest color palette
+  static const Color background = Color(0xFF0F1713); // Deep forest dark
+  static const Color surface = Color(0xFF1B261E);    // Dark moss surface
+  static const Color textPrimary = Color(0xFFEBEDED); // White/ice primary text
+  static const Color textSecondary = Color(0xFFAAB2AC); // Soft leaf grey text
+  static const Color primary = Color(0xFF62A87C);    // Pine green accent
+  static const Color accent = Color(0xFF7CB9E8);    // Mist blue accent
+  static const Color divider = Color(0x33EBEDED);   // Subtle light divider
 
-  // Liquid glass colors
-  static const Color glassWhite = Color(0xCCFFFFFF);         // white with ~80% opacity
-  static const Color glassBorder = Color(0xAAFFFFFF);        // border highlight
-  static const Color glassShadow = Color(0x22000000);        // subtle shadow
+  // Liquid glass colors (Optimized for dark background)
+  static const Color glassWhite = Color(0x1AFFFFFF);         // ~10% opacity white
+  static const Color glassBorder = Color(0x66FFFFFF);        // ~40% white for sharp edge
+  static const Color glassShadow = Color(0x44000000);        // Deeper shadow for depth
+  static const Color glassHighlight = Color(0xCCFFFFFF);      // ~80% white for spectral edge
 
   static const String fontFamily = 'Calibri';
 
   static ThemeData get lightTheme {
     return ThemeData(
-      brightness: Brightness.light,
-      primaryColor: accent,
+      brightness: Brightness.dark,
+      primaryColor: primary,
       scaffoldBackgroundColor: background,
       fontFamily: fontFamily,
-      colorScheme: ColorScheme.light(
-        primary: accent,
-        secondary: primary,
+      colorScheme: ColorScheme.dark(
+        primary: primary,
+        secondary: accent,
         surface: surface,
       ),
       textTheme: const TextTheme(

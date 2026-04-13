@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/background_scaffold.dart';
 
 class SplashLoadingScreen extends StatelessWidget {
   final String message;
-
   const SplashLoadingScreen({super.key, this.message = 'Synchronizing...'});
 
   @override
@@ -14,56 +12,54 @@ class SplashLoadingScreen extends StatelessWidget {
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40.0),
-          child: GlassCard(
-            borderRadius: 28,
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 52),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppTheme.primary.withOpacity(0.18),
-                      width: 1.2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 180,
+                width: 180,
+                child: GlassCard(
+                  padding: EdgeInsets.zero,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.security_rounded, size: 40, color: Colors.white),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: Colors.white.withValues(alpha: 0.8),
+                            backgroundColor: Colors.white10,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: const Icon(
-                    Icons.account_balance_outlined,
-                    size: 36,
-                    color: AppTheme.primary,
-                  ),
                 ),
-                const SizedBox(height: 32),
-                Text(
-                  'Co-op Loan Recovery',
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        fontSize: 22,
-                        color: AppTheme.textPrimary,
-                      ),
-                  textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 40),
+              Text(
+                message.toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  letterSpacing: 2,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  message,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'SAFE · SECURE · RELIABLE',
+                style: TextStyle(
+                  color: Colors.white24,
+                  fontSize: 9,
+                  letterSpacing: 1,
                 ),
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: CircularProgressIndicator(
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accent),
-                    strokeWidth: 2.5,
-                    backgroundColor: AppTheme.accent.withOpacity(0.12),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
