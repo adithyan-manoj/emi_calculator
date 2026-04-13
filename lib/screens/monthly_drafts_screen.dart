@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../models/monthly_recovery.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/background_scaffold.dart';
 import '../data/data_providers.dart';
 import 'pdf_preview_screen.dart';
 
@@ -12,7 +13,8 @@ class MonthlyDraftsScreen extends ConsumerStatefulWidget {
   const MonthlyDraftsScreen({super.key, required this.branchId});
 
   @override
-  ConsumerState<MonthlyDraftsScreen> createState() => _MonthlyDraftsScreenState();
+  ConsumerState<MonthlyDraftsScreen> createState() =>
+      _MonthlyDraftsScreenState();
 }
 
 class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
@@ -22,221 +24,497 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
   @override
   Widget build(BuildContext context) {
     final appState = ref.watch(appStateProvider).requireValue;
-    
+
     // Get all loans that belong to this branch
     final branchLoanIds = appState.loans.where((loan) {
-      final customer = appState.customers.firstWhere((c) => c.id == loan.customerId);
+      final customer =
+          appState.customers.firstWhere((c) => c.id == loan.customerId);
       return customer.officeId == widget.branchId;
     }).map((loan) => loan.id).toSet();
 
     // Filter drafts for current month/year AND this branch's loans
-    final drafts = appState.monthlyRecoveries.where((m) => 
-      m.month == _selectedMonth && 
-      m.year == _selectedYear &&
-      branchLoanIds.contains(m.loanId)
-    ).toList();
+    final drafts = appState.monthlyRecoveries
+        .where((m) =>
+            m.month == _selectedMonth &&
+            m.year == _selectedYear &&
+            branchLoanIds.contains(m.loanId))
+        .toList();
 
-    return Scaffold(
-      body: SafeArea(
+    return BackgroundScaffold(
+      appBar: AppBar(
+        title: Text('Monthly Drafts · $_selectedMonth/$_selectedYear'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+          onPressed: () => context.pop(),
+        ),
+      ),
+      child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => context.pop(),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Monthly Drafts ($_selectedMonth/$_selectedYear)',
-                    style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            Expanded(
-              child: GlassCard(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'EMI Verifications pending for generating report',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
+              const SizedBox(height: 12),
+              // ── Data table card ──────────────────────────────
+              Expanded(
+                child: GlassCard(
+                  borderRadius: 22,
+                  padding: const EdgeInsets.all(0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.table_rows_outlined,
+                              size: 18,
+                              color: AppTheme.textSecondary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'EMI Verifications',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .displayLarge
+                                  ?.copyWith(fontSize: 16),
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppTheme.accent.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                    color: AppTheme.accent.withOpacity(0.18),
+                                    width: 1),
+                              ),
+                              child: Text(
+                                '${drafts.length} records',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.accent,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 6, 20, 14),
+                        child: Text(
+                          'Pending verifications before generating report',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                      const Divider(height: 1, color: AppTheme.divider),
+                      Expanded(
                         child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: DataTable(
-                            columns: const [
-                              DataColumn(label: Text('Customer')),
-                              DataColumn(label: Text('A/C No.')),
-                              DataColumn(label: Text('Principal\nDue')),
-                              DataColumn(label: Text('Interest')),
-                              DataColumn(label: Text('Penal\nInterest')),
-                              DataColumn(label: Text('Total')),
-                              DataColumn(label: Text('Edit')),
-                            ],
-                            rows: drafts.map((draft) => _buildDraftRow(context, ref, draft)).toList(),
+                          scrollDirection: Axis.vertical,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              child: DataTable(
+                                headingRowColor:
+                                    WidgetStateProperty.all(Colors.transparent),
+                                dataRowColor:
+                                    WidgetStateProperty.all(Colors.transparent),
+                                dividerThickness: 0.5,
+                                columnSpacing: 18,
+                                headingTextStyle: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                  color: AppTheme.textSecondary,
+                                  letterSpacing: 0.4,
+                                ),
+                                dataTextStyle: const TextStyle(
+                                  fontSize: 13,
+                                  color: AppTheme.textPrimary,
+                                ),
+                                columns: const [
+                                  DataColumn(label: Text('CUSTOMER')),
+                                  DataColumn(label: Text('A/C NO.')),
+                                  DataColumn(label: Text('PRINCIPAL')),
+                                  DataColumn(label: Text('INTEREST')),
+                                  DataColumn(label: Text('PENAL')),
+                                  DataColumn(label: Text('TOTAL')),
+                                  DataColumn(label: Text('EDIT')),
+                                ],
+                                rows: drafts
+                                    .map((draft) =>
+                                        _buildDraftRow(context, ref, draft))
+                                    .toList(),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime(_selectedYear, _selectedMonth),
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2030),
-                      );
-                      if (date != null) {
-                        setState(() {
-                          _selectedMonth = date.month;
-                          _selectedYear = date.year;
-                        });
-                        try {
-                          final msg = await ref.read(appStateProvider.notifier).generateDrafts(date.month, date.year);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.green));
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to generate: $e'), backgroundColor: Colors.red));
+              const SizedBox(height: 16),
+              // ── Action buttons ───────────────────────────────
+              Row(
+                children: [
+                  Expanded(
+                    child: _ActionButton(
+                      icon: Icons.sync_rounded,
+                      label: 'Generate Data',
+                      filled: false,
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime(_selectedYear, _selectedMonth),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2030),
+                        );
+                        if (date != null) {
+                          setState(() {
+                            _selectedMonth = date.month;
+                            _selectedYear = date.year;
+                          });
+                          try {
+                            final msg = await ref
+                                .read(appStateProvider.notifier)
+                                .generateDrafts(date.month, date.year);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(msg),
+                                  backgroundColor: Colors.green.shade600,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Failed to generate: $e'),
+                                  backgroundColor: Colors.red.shade600,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                ),
+                              );
+                            }
                           }
                         }
-                      }
-                    },
-                    icon: const Icon(Icons.sync),
-                    label: const Text('Generate Data'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppTheme.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      },
                     ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      final office = appState.offices.firstWhere((o) => o.id == widget.branchId);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (ctx) => PdfPreviewScreen(
-                            office: office,
-                            month: _selectedMonth,
-                            year: _selectedYear,
-                            drafts: drafts,
-                            customers: appState.customers,
-                            loans: appState.loans,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ActionButton(
+                      icon: Icons.picture_as_pdf_outlined,
+                      label: 'Generate PDF',
+                      filled: true,
+                      onTap: () {
+                        final office = appState.offices
+                            .firstWhere((o) => o.id == widget.branchId);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (ctx) => PdfPreviewScreen(
+                              office: office,
+                              month: _selectedMonth,
+                              year: _selectedYear,
+                              drafts: drafts,
+                              customers: appState.customers,
+                              loans: appState.loans,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.picture_as_pdf),
-                    label: const Text('Generate Final PDF'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        );
+                      },
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
 
-  DataRow _buildDraftRow(BuildContext context, WidgetRef ref, MonthlyRecovery draft) {
+  DataRow _buildDraftRow(
+      BuildContext context, WidgetRef ref, MonthlyRecovery draft) {
     final appState = ref.read(appStateProvider).requireValue;
     final loan = appState.loans.firstWhere((l) => l.id == draft.loanId);
-    final customer = appState.customers.firstWhere((c) => c.id == loan.customerId);
+    final customer =
+        appState.customers.firstWhere((c) => c.id == loan.customerId);
 
     return DataRow(
       cells: [
-        DataCell(Text(customer.name, style: const TextStyle(fontWeight: FontWeight.w600))),
+        DataCell(Text(customer.name,
+            style: const TextStyle(fontWeight: FontWeight.w600))),
         DataCell(Text(loan.accountNo)),
         DataCell(Text('₹${draft.principalDue.toStringAsFixed(0)}')),
         DataCell(Text('₹${draft.interest.toStringAsFixed(0)}')),
-        DataCell(Text('₹${draft.penalInterest.toStringAsFixed(0)}', style: TextStyle(color: draft.penalInterest > 0 ? Colors.red : null))),
-        DataCell(Text('₹${draft.totalRecovered.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold))),
+        DataCell(Text(
+          '₹${draft.penalInterest.toStringAsFixed(0)}',
+          style: TextStyle(
+              color: draft.penalInterest > 0 ? Colors.red.shade400 : null),
+        )),
+        DataCell(Text(
+          '₹${draft.totalRecovered.toStringAsFixed(0)}',
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        )),
         DataCell(
-          IconButton(
-            icon: const Icon(Icons.edit, size: 20),
-            onPressed: () {
-              _showEditModal(context, ref, draft, customer.name);
-            },
+          GestureDetector(
+            onTap: () => _showEditModal(context, ref, draft, customer.name),
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withOpacity(0.07),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                    color: AppTheme.primary.withOpacity(0.14), width: 1),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.edit_outlined,
+                      size: 13, color: AppTheme.primary),
+                  SizedBox(width: 4),
+                  Text(
+                    'Edit',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  void _showEditModal(BuildContext context, WidgetRef ref, MonthlyRecovery draft, String customerName) {
-    final principalCtrl = TextEditingController(text: draft.principalDue.toString());
-    final interestCtrl = TextEditingController(text: draft.interest.toString());
-    final penalCtrl = TextEditingController(text: draft.penalInterest.toString());
-    final othersCtrl = TextEditingController(text: draft.otherCharges.toString());
-    
+  void _showEditModal(BuildContext context, WidgetRef ref,
+      MonthlyRecovery draft, String customerName) {
+    final principalCtrl =
+        TextEditingController(text: draft.principalDue.toString());
+    final interestCtrl =
+        TextEditingController(text: draft.interest.toString());
+    final penalCtrl =
+        TextEditingController(text: draft.penalInterest.toString());
+    final othersCtrl =
+        TextEditingController(text: draft.otherCharges.toString());
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: Text('Edit Recovery: $customerName'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: principalCtrl, decoration: const InputDecoration(labelText: 'Principal Due'), keyboardType: TextInputType.number),
-              TextField(controller: interestCtrl, decoration: const InputDecoration(labelText: 'Interest'), keyboardType: TextInputType.number),
-              TextField(controller: penalCtrl, decoration: const InputDecoration(labelText: 'Penal Interest'), keyboardType: TextInputType.number),
-              TextField(controller: othersCtrl, decoration: const InputDecoration(labelText: 'Other Charges'), keyboardType: TextInputType.number),
-            ],
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GlassCard(
+          borderRadius: 24,
+          padding: const EdgeInsets.all(28),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Edit Recovery',
+                  style: Theme.of(context)
+                      .textTheme
+                      .displayLarge
+                      ?.copyWith(fontSize: 18),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  customerName,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 20),
+                _GlassTextField(
+                    controller: principalCtrl,
+                    label: 'Principal Due',
+                    keyboardType: TextInputType.number),
+                const SizedBox(height: 12),
+                _GlassTextField(
+                    controller: interestCtrl,
+                    label: 'Interest',
+                    keyboardType: TextInputType.number),
+                const SizedBox(height: 12),
+                _GlassTextField(
+                    controller: penalCtrl,
+                    label: 'Penal Interest',
+                    keyboardType: TextInputType.number),
+                const SizedBox(height: 12),
+                _GlassTextField(
+                    controller: othersCtrl,
+                    label: 'Other Charges',
+                    keyboardType: TextInputType.number),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Cancel',
+                          style: TextStyle(color: AppTheme.textSecondary)),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                      ),
+                      onPressed: () {
+                        ref.read(appStateProvider.notifier).updateDraft(
+                              draft.id,
+                              principalDue:
+                                  double.tryParse(principalCtrl.text) ?? 0.0,
+                              interest:
+                                  double.tryParse(interestCtrl.text) ?? 0.0,
+                              penalInt:
+                                  double.tryParse(penalCtrl.text) ?? 0.0,
+                              others:
+                                  double.tryParse(othersCtrl.text) ?? 0.0,
+                            );
+                        Navigator.pop(ctx);
+                      },
+                      child: const Text('Save Draft'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              ref.read(appStateProvider.notifier).updateDraft(
-                draft.id, 
-                principalDue: double.tryParse(principalCtrl.text) ?? 0.0,
-                interest: double.tryParse(interestCtrl.text) ?? 0.0,
-                penalInt: double.tryParse(penalCtrl.text) ?? 0.0,
-                others: double.tryParse(othersCtrl.text) ?? 0.0,
-              );
-              Navigator.pop(ctx);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, foregroundColor: Colors.white),
-            child: const Text('Save Draft'),
+      ),
+    );
+  }
+}
+
+// ─── Sub-widgets ─────────────────────────────────────────────────────────────
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool filled;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.filled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        decoration: BoxDecoration(
+          color: filled
+              ? AppTheme.primary
+              : Colors.white.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: filled
+                ? Colors.transparent
+                : AppTheme.divider,
+            width: 1.2,
           ),
-        ],
+          boxShadow: filled
+              ? [
+                  BoxShadow(
+                    color: AppTheme.primary.withOpacity(0.22),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : [],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: filled ? Colors.white : AppTheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: filled ? Colors.white : AppTheme.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final TextInputType keyboardType;
+  const _GlassTextField({
+    required this.controller,
+    required this.label,
+    this.keyboardType = TextInputType.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle:
+            const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.5),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppTheme.divider, width: 1),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppTheme.divider, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide:
+              const BorderSide(color: AppTheme.accent, width: 1.5),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }
