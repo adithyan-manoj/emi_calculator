@@ -12,7 +12,7 @@ class Loan {
     required this.accountNo,
     required this.principalOutstanding,
     required this.baseEmiAmount,
-    this.status = 'ACTIVE',
+    this.status = 'Active',
   });
 
   factory Loan.fromJson(Map<String, dynamic> json) {
@@ -22,7 +22,7 @@ class Loan {
       accountNo: json['account_no'],
       principalOutstanding: (json['principal_outstanding'] as num?)?.toDouble() ?? 0.0,
       baseEmiAmount: (json['base_emi_amount'] as num?)?.toDouble() ?? 0.0,
-      status: json['status'] ?? 'ACTIVE',
+      status: json['status'] ?? 'Active',
     );
   }
 

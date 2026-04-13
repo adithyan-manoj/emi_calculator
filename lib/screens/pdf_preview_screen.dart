@@ -6,6 +6,8 @@ import 'package:printing/printing.dart';
 import '../services/pdf_service.dart';
 import '../models/monthly_recovery.dart';
 import '../models/office.dart';
+import '../models/customer.dart';
+import '../models/loan.dart';
 import '../theme/app_theme.dart';
 
 class PdfPreviewScreen extends StatelessWidget {

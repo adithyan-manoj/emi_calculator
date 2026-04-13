@@ -76,8 +76,9 @@ class ApiService {
     return (response.data as List).map((e) => MonthlyRecovery.fromJson(e)).toList();
   }
 
-  Future<void> generateDrafts(int month, int year) async {
-    await _dio.post('/recoveries/generate', queryParameters: {'month': month, 'year': year});
+  Future<String> generateDrafts(int month, int year) async {
+    final response = await _dio.post('/recoveries/generate', queryParameters: {'month': month, 'year': year});
+    return response.data['message'] as String;
   }
 
   Future<MonthlyRecovery> updateRecovery(

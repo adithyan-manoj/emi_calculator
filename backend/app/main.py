@@ -105,7 +105,7 @@ def create_recovery(recovery: schemas.MonthlyRecoveryBase, db: Session = Depends
 
 @app.post("/recoveries/generate")
 def generate_drafts(month: int, year: int, db: Session = Depends(get_db)):
-    loans = db.query(models.Loan).filter(models.Loan.status == 'Active').all()
+    loans = db.query(models.Loan).filter(models.Loan.status.in_(['Active', 'ACTIVE'])).all()
     created_drafts = []
     
     for loan in loans:

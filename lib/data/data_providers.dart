@@ -147,13 +147,14 @@ class AppStateNotifier extends AsyncNotifier<AppState> {
     });
   }
 
-  Future<void> generateDrafts(int month, int year) async {
+  Future<String> generateDrafts(int month, int year) async {
     final api = ref.read(apiServiceProvider);
-    await api.generateDrafts(month, year);
+    final msg = await api.generateDrafts(month, year);
     
     // Refresh recoveries
     final recoveries = await api.getRecoveries();
     state = state.whenData((current) => current.copyWith(monthlyRecoveries: recoveries));
+    return msg;
   }
 }
 

@@ -22,8 +22,19 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
   @override
   Widget build(BuildContext context) {
     final appState = ref.watch(appStateProvider).requireValue;
-    // Filter drafts for current mocked month
-    final drafts = appState.monthlyRecoveries.where((m) => m.month == _selectedMonth && m.year == _selectedYear).toList();
+    
+    // Get all loans that belong to this branch
+    final branchLoanIds = appState.loans.where((loan) {
+      final customer = appState.customers.firstWhere((c) => c.id == loan.customerId);
+      return customer.officeId == widget.branchId;
+    }).map((loan) => loan.id).toSet();
+
+    // Filter drafts for current month/year AND this branch's loans
+    final drafts = appState.monthlyRecoveries.where((m) => 
+      m.month == _selectedMonth && 
+      m.year == _selectedYear &&
+      branchLoanIds.contains(m.loanId)
+    ).toList();
 
     return Scaffold(
       body: SafeArea(
@@ -101,7 +112,16 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
                           _selectedMonth = date.month;
                           _selectedYear = date.year;
                         });
-                        await ref.read(appStateProvider.notifier).generateDrafts(date.month, date.year);
+                        try {
+                          final msg = await ref.read(appStateProvider.notifier).generateDrafts(date.month, date.year);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.green));
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to generate: $e'), backgroundColor: Colors.red));
+                          }
+                        }
                       }
                     },
                     icon: const Icon(Icons.sync),
