@@ -9,17 +9,9 @@ import '../models/monthly_recovery.dart';
 class ApiService {
   late final Dio _dio;
   
-  // Use 10.0.2.2 for Android emulator to access localhost, otherwise localhost
-  String get _baseUrl {
-    try {
-      if (Platform.isAndroid) {
-        return 'http://10.0.2.2:8000';
-      }
-    } catch (e) {
-      // Platform.isAndroid throws on web
-    }
-    return 'http://127.0.0.1:8000';
-  }
+  // Using 127.0.0.1 because adb reverse maps the phone directly to the PC
+  final String _baseUrl = 'http://127.0.0.1:8000';
+
 
   ApiService() {
     _dio = Dio(BaseOptions(
