@@ -12,17 +12,19 @@ if os.path.exists(env_path):
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 
+# Use a placeholder if the URL is missing to prevent import-time crashes
 if SQLALCHEMY_DATABASE_URL is None:
-    # If still None, it might be due to Render's env var sync delay
-    print("WARNING: DATABASE_URL not found. Waiting for environment...")
+    print("CRITICAL: DATABASE_URL is missing from environment variables!")
+    SQLALCHEMY_DATABASE_URL = "postgresql://user:pass@localhost/dummy" 
 
-# For PostgreSQL, we don't need check_same_thread
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
 def get_db():
+    if "dummy" in SQLALCHEMY_DATABASE_URL:
+        raise ValueError("Database connection failed: DATABASE_URL environment variable is missing.")
     db = SessionLocal()
     try:
         yield db
