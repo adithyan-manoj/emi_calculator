@@ -12,164 +12,171 @@ class BranchDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appState = ref.watch(appStateProvider).requireValue;
-    final office = appState.offices.firstWhere((o) => o.id == branchId);
-    final customers =
-        appState.customers.where((c) => c.officeId == branchId).toList();
+    final appStateAsync = ref.watch(appStateProvider);
 
-    return BackgroundScaffold(
-      appBar: AppBar(
-        title: Text(office.name),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-          onPressed: () => context.pop(),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: SizedBox(
-              height: 38,
-              child: GestureDetector(
-                onTap: () => context.push('/branch/$branchId/drafts'),
-                child: const GlassPill(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.description_outlined, size: 14, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text('Drafts', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
-                    ],
-                  ),
-                ),
-              ),
+    return appStateAsync.when(
+      loading: () => const GlassLoadingPlaceholder(message: 'FETCHING UNIT DATA'),
+      error: (e, s) => GlassErrorPlaceholder(message: 'UNIT DATA UNAVAILABLE', error: e),
+      data: (appState) {
+        final office = appState.offices.firstWhere((o) => o.id == branchId);
+        final customers =
+            appState.customers.where((c) => c.officeId == branchId).toList();
+
+        return BackgroundScaffold(
+          appBar: AppBar(
+            title: Text(office.name),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+              onPressed: () => context.pop(),
             ),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Unit Members',
-                    style: Theme.of(context)
-                        .textTheme
-                        .displayLarge
-                        ?.copyWith(fontSize: 30),
-                  ),
-                  SizedBox(
-                    height: 48,
-                    child: GestureDetector(
-                      onTap: () => _showAddEmployeeModal(context, ref),
-                      child: const GlassPill(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.person_add_alt_1_outlined, size: 18, color: Colors.white),
-                            SizedBox(width: 8),
-                            Text('ADD', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
-                          ],
-                        ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: SizedBox(
+                  height: 38,
+                  child: GestureDetector(
+                    onTap: () => context.push('/branch/$branchId/drafts'),
+                    child: const GlassPill(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.description_outlined, size: 14, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text('Drafts', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              Expanded(
-                child: customers.isEmpty
-                    ? const Center(
-                        child: Text('No registered members in this unit.', style: TextStyle(color: Colors.white38)),
-                      )
-                    : ListView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: customers.length,
-                        itemBuilder: (context, index) {
-                          final customer = customers[index];
-                          final customerLoans = appState.loans
-                              .where((l) => l.customerId == customer.id)
-                              .toList();
-                          final totalOs = customerLoans.fold(
-                              0.0, (sum, l) => sum + l.principalOutstanding);
-
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 20.0),
-                            child: SizedBox(
-                              height: 140,
-                              child: GlassCard(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 44,
-                                          height: 44,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withValues(alpha: 0.08),
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: const Icon(Icons.person_outline_rounded, color: Colors.white),
-                                        ),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(customer.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                                              Text('ID: ${customer.memberNo}', style: const TextStyle(fontSize: 12, color: Colors.white60)),
-                                            ],
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
-                                          onPressed: () => _showDeleteDialog(context, ref, customer.id, customer.name),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        SizedBox(
-                                          height: 38,
-                                          child: GestureDetector(
-                                            onTap: () => context.push('/customer/${customer.id}'),
-                                            child: const GlassPill(
-                                              padding: EdgeInsets.symmetric(horizontal: 14),
-                                              child: Text('MANAGE', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const Spacer(),
-                                    const Divider(color: Colors.white12, height: 1),
-                                    const Spacer(),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                      children: [
-                                        _StatItem(label: 'LOANS', value: '${customerLoans.length}'),
-                                        _StatItem(label: 'OUTSTANDING', value: '₹${totalOs.toStringAsFixed(0)}', highlight: true),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                ),
               ),
             ],
           ),
-        ),
-      ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Unit Members',
+                        style: Theme.of(context)
+                            .textTheme
+                            .displayLarge
+                            ?.copyWith(fontSize: 30),
+                      ),
+                      SizedBox(
+                        height: 48,
+                        child: GestureDetector(
+                          onTap: () => _showAddEmployeeModal(context, ref),
+                          child: const GlassPill(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.person_add_alt_1_outlined, size: 18, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text('ADD', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  Expanded(
+                    child: customers.isEmpty
+                        ? const Center(
+                            child: Text('No registered members in this unit.', style: TextStyle(color: Colors.white38)),
+                          )
+                        : ListView.builder(
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: customers.length,
+                            itemBuilder: (context, index) {
+                              final customer = customers[index];
+                              final customerLoans = appState.loans
+                                  .where((l) => l.customerId == customer.id)
+                                  .toList();
+                              final totalOs = customerLoans.fold(
+                                  0.0, (sum, l) => sum + l.principalOutstanding);
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 20.0),
+                                child: SizedBox(
+                                  height: 140,
+                                  child: GlassCard(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: 44,
+                                              height: 44,
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withValues(alpha: 0.08),
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: const Icon(Icons.person_outline_rounded, color: Colors.white),
+                                            ),
+                                            const SizedBox(width: 16),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(customer.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                                                  Text('ID: ${customer.memberNo}', style: const TextStyle(fontSize: 12, color: Colors.white60)),
+                                                ],
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                                              onPressed: () => _showDeleteDialog(context, ref, customer.id, customer.name),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            SizedBox(
+                                              height: 38,
+                                              child: GestureDetector(
+                                                onTap: () => context.push('/customer/${customer.id}'),
+                                                child: const GlassPill(
+                                                  padding: EdgeInsets.symmetric(horizontal: 14),
+                                                  child: Text('MANAGE', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Spacer(),
+                                        const Divider(color: Colors.white12, height: 1),
+                                        const Spacer(),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                          children: [
+                                            _StatItem(label: 'LOANS', value: '${customerLoans.length}'),
+                                            _StatItem(label: 'OUTSTANDING', value: '₹${totalOs.toStringAsFixed(0)}', highlight: true),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -179,7 +186,7 @@ class BranchDetailsScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => _GlassDialog(
         title: 'Remove Member?',
-        content: 'This will purge all active loan records for $customerName. This action cannot be undone.',
+        content: 'This will purge all active loan records for $customerName.',
         onConfirm: () {
           ref.read(appStateProvider.notifier).deleteEmployee(customerId);
           Navigator.pop(ctx);

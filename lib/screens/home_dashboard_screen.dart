@@ -21,10 +21,39 @@ class HomeDashboardScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(32.0),
             child: GlassCard(
-              child: Text(
-                'Initialization failed: $error',
-                style: const TextStyle(color: Colors.redAccent),
-                textAlign: TextAlign.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.cloud_off_rounded, color: Colors.redAccent, size: 48),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Connection Error',
+                    style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24, color: Colors.white),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'The app could not reach the backend. Ensure your phone and PC are on the same Wi-Fi and that the backend is running.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
+                  ),
+                  const SizedBox(height: 24),
+                  GestureDetector(
+                    onTap: () => ref.invalidate(appStateProvider),
+                    child: const SizedBox(
+                      height: 50,
+                      width: 160,
+                      child: GlassPill(
+                        child: Text('RETRY CONNECTION', style: TextStyle(color: AppTheme.accent, fontWeight: FontWeight.bold, fontSize: 11)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    'Debug: $error',
+                    style: const TextStyle(color: Colors.white24, fontSize: 10),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ),
@@ -89,10 +118,10 @@ class HomeDashboardScreen extends ConsumerWidget {
                     child: GridView.builder(
                       physics: const BouncingScrollPhysics(),
                       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 420,
-                        childAspectRatio: 1.05,
-                        crossAxisSpacing: 20,
-                        mainAxisSpacing: 20,
+                        maxCrossAxisExtent: 220,
+                        childAspectRatio: 0.9,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
                       ),
                       itemCount: branches.length,
                       itemBuilder: (context, index) {
@@ -104,7 +133,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                         return GestureDetector(
                           onTap: () => context.push('/branch/${branch.id}'),
                           child: GlassCard(
-                            padding: const EdgeInsets.all(24),
+                            padding: const EdgeInsets.all(16),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -113,11 +142,11 @@ class HomeDashboardScreen extends ConsumerWidget {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Container(
-                                      width: 48,
-                                      height: 48,
+                                      width: 36,
+                                      height: 36,
                                       decoration: BoxDecoration(
                                         color: Colors.white.withValues(alpha: 0.08),
-                                        borderRadius: BorderRadius.circular(14),
+                                        borderRadius: BorderRadius.circular(10),
                                         border: Border.all(
                                           color: Colors.white.withValues(alpha: 0.15),
                                           width: 1,
@@ -125,15 +154,16 @@ class HomeDashboardScreen extends ConsumerWidget {
                                       ),
                                       child: const Icon(
                                         Icons.grid_view_rounded,
-                                        size: 22,
+                                        size: 18,
                                         color: Colors.white,
                                       ),
                                     ),
                                     IconButton(
+                                      visualDensity: VisualDensity.compact,
                                       icon: const Icon(
                                         Icons.delete_sweep_outlined,
                                         color: Colors.redAccent,
-                                        size: 22,
+                                        size: 18,
                                       ),
                                       onPressed: () => _showDeleteBranchDialog(
                                           context, ref, branch.id, branch.name),
@@ -148,28 +178,22 @@ class HomeDashboardScreen extends ConsumerWidget {
                                       style: Theme.of(context)
                                           .textTheme
                                           .displayLarge
-                                          ?.copyWith(fontSize: 22),
+                                          ?.copyWith(fontSize: 16),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 16),
+                                    const SizedBox(height: 10),
                                     Row(
                                       children: [
-                                        // Nested glass pill for status/count
-                                        IntrinsicWidth(
-                                          child: SizedBox(
-                                            height: 34,
-                                            child: GlassPill(
-                                              padding: const EdgeInsets.symmetric(horizontal: 14),
-                                              child: Text(
-                                                '$employeeCount EMPLOYEES',
-                                                style: const TextStyle(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: Colors.white,
-                                                  letterSpacing: 0.5,
-                                                ),
-                                              ),
+                                        GlassPill(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                          child: Text(
+                                            '$employeeCount EMPLOYEES',
+                                            style: const TextStyle(
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.w800,
+                                              color: Colors.white,
+                                              letterSpacing: 0.4,
                                             ),
                                           ),
                                         ),
@@ -177,7 +201,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                                         const Icon(
                                           Icons.arrow_right_alt_rounded,
                                           color: Colors.white70,
-                                          size: 24,
+                                          size: 18,
                                         ),
                                       ],
                                     ),

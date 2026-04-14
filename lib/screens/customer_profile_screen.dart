@@ -13,147 +13,153 @@ class CustomerProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appState = ref.watch(appStateProvider).requireValue;
-    final customer = appState.customers.firstWhere((c) => c.id == customerId);
-    final office = appState.offices.firstWhere((o) => o.id == customer.officeId);
-    final loans = appState.loans.where((l) => l.customerId == customerId).toList();
+    final appStateAsync = ref.watch(appStateProvider);
 
-    return BackgroundScaffold(
-      appBar: AppBar(
-        title: const Text('Member Profile'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      floatingActionButton: SizedBox(
-        height: 54,
-        width: 150,
-        child: GestureDetector(
-          onTap: () => _showAddLoanModal(context, ref),
-          child: const GlassPill(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.assignment_add, color: Colors.white, size: 18),
-                SizedBox(width: 10),
-                Text('NEW LOAN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, letterSpacing: 0.5, fontSize: 11)),
-              ],
+    return appStateAsync.when(
+      loading: () => const GlassLoadingPlaceholder(message: 'FETCHING PROFILE'),
+      error: (e, s) => GlassErrorPlaceholder(message: 'PROFILE UNAVAILABLE', error: e),
+      data: (appState) {
+        final customer = appState.customers.firstWhere((c) => c.id == customerId);
+        final office = appState.offices.firstWhere((o) => o.id == customer.officeId);
+        final loans = appState.loans.where((l) => l.customerId == customerId).toList();
+
+        return BackgroundScaffold(
+          appBar: AppBar(
+            title: const Text('Member Profile'),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+              onPressed: () => context.pop(),
             ),
           ),
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              // Profile Header
-              SizedBox(
-                height: 110,
-                child: GlassCard(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-                        ),
-                        child: const Icon(Icons.person, color: Colors.white, size: 32),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(customer.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-                            const SizedBox(height: 4),
-                            Text('${office.name} Unit · Member #${customer.memberNo}', style: const TextStyle(fontSize: 12, color: Colors.white60)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+          floatingActionButton: SizedBox(
+            height: 54,
+            width: 150,
+            child: GestureDetector(
+              onTap: () => _showAddLoanModal(context, ref),
+              child: const GlassPill(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.assignment_add, color: Colors.white, size: 18),
+                    SizedBox(width: 10),
+                    Text('NEW LOAN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, letterSpacing: 0.5, fontSize: 11)),
+                  ],
                 ),
               ),
-              const SizedBox(height: 40),
-              Text(
-                'Financial Exposure',
-                style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: loans.isEmpty
-                    ? const Center(child: Text('No active loan accounts found.', style: TextStyle(color: Colors.white24)))
-                    : ListView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: loans.length,
-                        itemBuilder: (context, index) {
-                          final loan = loans[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 24.0),
-                            child: SizedBox(
-                              height: 150,
-                              child: GlassCard(
-                                padding: const EdgeInsets.all(24),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text('A/C ${loan.accountNo}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
-                                          const SizedBox(height: 4),
-                                          _StatusPill(status: loan.status),
-                                          const Spacer(),
-                                          Row(
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    height: 110,
+                    child: GlassCard(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                            ),
+                            child: const Icon(Icons.person, color: Colors.white, size: 32),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(customer.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                                const SizedBox(height: 4),
+                                Text('${office.name} Unit · Member #${customer.memberNo}', style: const TextStyle(fontSize: 12, color: Colors.white60)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Text(
+                    'Financial Exposure',
+                    style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: loans.isEmpty
+                        ? const Center(child: Text('No active loan accounts found.', style: TextStyle(color: Colors.white24)))
+                        : ListView.builder(
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: loans.length,
+                            itemBuilder: (context, index) {
+                              final loan = loans[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 24.0),
+                                child: SizedBox(
+                                  height: 150,
+                                  child: GlassCard(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              _LoanSmallStat(label: 'OUTSTANDING', value: '₹${loan.principalOutstanding.toStringAsFixed(0)}'),
-                                              const SizedBox(width: 24),
-                                              _LoanSmallStat(label: 'BASE EMI', value: '₹${loan.baseEmiAmount.toStringAsFixed(0)}', highlight: true),
+                                              Text('A/C ${loan.accountNo}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+                                              const SizedBox(height: 4),
+                                              _StatusPill(status: loan.status),
+                                              const Spacer(),
+                                              Row(
+                                                children: [
+                                                  _LoanSmallStat(label: 'OUTSTANDING', value: '₹${loan.principalOutstanding.toStringAsFixed(0)}'),
+                                                  const SizedBox(width: 24),
+                                                  _LoanSmallStat(label: 'BASE EMI', value: '₹${loan.baseEmiAmount.toStringAsFixed(0)}', highlight: true),
+                                                ],
+                                              ),
                                             ],
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                    Column(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 22),
-                                          onPressed: () => _showDeleteLoanDialog(context, ref, loan.id),
                                         ),
-                                        const Spacer(),
-                                        SizedBox(
-                                          height: 40,
-                                          width: 90,
-                                          child: const GlassPill(
-                                            child: Text('HISTORY', style: TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold)),
-                                          ),
+                                        Column(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 22),
+                                              onPressed: () => _showDeleteLoanDialog(context, ref, loan.id),
+                                            ),
+                                            const Spacer(),
+                                            SizedBox(
+                                              height: 40,
+                                              width: 90,
+                                              child: const GlassPill(
+                                                child: Text('HISTORY', style: TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold)),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -162,7 +168,7 @@ class CustomerProfileScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => _GlassDialog(
         title: 'Purge Loan Record?',
-        content: 'This will permanently delete this loan account from the system. Ensure all records are synchronized before proceeding.',
+        content: 'This will permanently delete this loan account from the system.',
         onConfirm: () {
           ref.read(appStateProvider.notifier).deleteLoan(loanId);
           Navigator.pop(ctx);

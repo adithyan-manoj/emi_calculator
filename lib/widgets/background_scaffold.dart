@@ -31,9 +31,9 @@ class BackgroundScaffold extends StatelessWidget {
             'assets/atmospheric_nature_bg.png',
             fit: BoxFit.cover,
           ),
-          // Dark glass tint overlay
+          // Dark glass tint overlay (Dimmed for better readability)
           const ColoredBox(
-            color: Color(0x33000000), // Very light dark tint
+            color: Color(0x77000000), // Increased from 0x33 for better text contrast
           ),
           // Actual screen content
           child,

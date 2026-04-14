@@ -37,34 +37,36 @@ class AppState {
 class AppStateNotifier extends AsyncNotifier<AppState> {
   @override
   Future<AppState> build() async {
-    // Artificial delay to show off the professional loading screen
-    await Future.delayed(const Duration(seconds: 2));
-
     final api = ref.watch(apiServiceProvider);
     
-    final offices = await api.getOffices();
-    final customers = await api.getCustomers();
-    final loans = await api.getLoans();
-    final recoveries = await api.getRecoveries();
+    // Fetch all core data in parallel for stability and speed
+    try {
+      final results = await Future.wait([
+        api.getOffices(),
+        api.getCustomers(),
+        api.getLoans(),
+        api.getRecoveries(),
+      ]);
 
-    return AppState(
-      offices: offices,
-      customers: customers,
-      loans: loans,
-      monthlyRecoveries: recoveries,
-    );
+      return AppState(
+        offices: results[0] as List<Office>,
+        customers: results[1] as List<Customer>,
+        loans: results[2] as List<Loan>,
+        monthlyRecoveries: results[3] as List<MonthlyRecovery>,
+      );
+    } catch (e) {
+      // Re-throw so Riverpod handles the error state correctly
+      rethrow;
+    }
   }
 
   Future<void> addBranch(String name) async {
     if (name.trim().isEmpty) return;
     
     final newOffice = Office(id: const Uuid().v4(), branchId: 'b1', name: name);
-    
-    // Save to backend
     final api = ref.read(apiServiceProvider);
     final savedOffice = await api.createOffice(newOffice);
 
-    // Update local state conditionally on success
     state = state.whenData((current) => current.copyWith(
       offices: [...current.offices, savedOffice]
     ));
@@ -82,7 +84,6 @@ class AppStateNotifier extends AsyncNotifier<AppState> {
     if (name.trim().isEmpty || memberNo.trim().isEmpty) return;
     
     final customer = Customer(id: const Uuid().v4(), officeId: branchId, memberNo: memberNo, name: name);
-    
     final api = ref.read(apiServiceProvider);
     final savedCustomer = await api.createCustomer(customer);
 

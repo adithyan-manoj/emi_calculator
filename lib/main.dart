@@ -7,6 +7,7 @@ import 'screens/home_dashboard_screen.dart';
 import 'screens/branch_details_screen.dart';
 import 'screens/customer_profile_screen.dart';
 import 'screens/monthly_drafts_screen.dart';
+import 'screens/pdf_preview_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -34,6 +35,12 @@ final _router = GoRouter(
     GoRoute(
       path: '/branch/:id/drafts',
       builder: (context, state) => MonthlyDraftsScreen(
+        branchId: state.pathParameters['id']!,
+      ),
+    ),
+    GoRoute(
+      path: '/branch/:id/preview',
+      builder: (context, state) => PdfPreviewScreen(
         branchId: state.pathParameters['id']!,
       ),
     ),

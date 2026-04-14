@@ -10,7 +10,7 @@ class ApiService {
   late final Dio _dio;
   
   // Using 127.0.0.1 because adb reverse maps the phone directly to the PC
-  final String _baseUrl = 'http://127.0.0.1:8000';
+  final String _baseUrl = 'http://192.168.1.74:8000';
 
 
   ApiService() {
