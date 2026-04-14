@@ -39,9 +39,11 @@ final _router = GoRouter(
       ),
     ),
     GoRoute(
-      path: '/branch/:id/preview',
+      path: '/branch/:id/preview/:month/:year',
       builder: (context, state) => PdfPreviewScreen(
         branchId: state.pathParameters['id']!,
+        month: int.parse(state.pathParameters['month']!),
+        year: int.parse(state.pathParameters['year']!),
       ),
     ),
   ],

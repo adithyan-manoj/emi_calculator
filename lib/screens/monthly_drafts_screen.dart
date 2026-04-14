@@ -34,9 +34,12 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
             .expand((c) => appState.loans.where((l) => l.customerId == c.id).map((l) => l.id))
             .toSet();
 
-        final drafts = appState.monthlyRecoveries
-            .where((d) => d.month == _currentMonth && d.year == _currentYear && branchLoanIds.contains(d.loanId))
-            .toList();
+        // Ensure we only show drafts for this branch and current period
+        final drafts = appState.monthlyRecoveries.where((d) {
+          final isSamePeriod = d.month == _currentMonth && d.year == _currentYear;
+          final belongsToBranch = branchLoanIds.contains(d.loanId);
+          return isSamePeriod && belongsToBranch;
+        }).toList();
 
         return BackgroundScaffold(
           appBar: AppBar(
@@ -55,7 +58,7 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
                   child: SizedBox(
                     height: 38,
                     child: GestureDetector(
-                      onTap: () => context.push('/branch/${widget.branchId}/preview'),
+                      onTap: () => context.push('/branch/${widget.branchId}/preview/$_currentMonth/$_currentYear'),
                       child: const GlassPill(
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -90,7 +93,7 @@ class _MonthlyDraftsScreenState extends ConsumerState<MonthlyDraftsScreen> {
                         child: GestureDetector(
                           onTap: () async {
                             final messenger = ScaffoldMessenger.of(context);
-                            final msg = await ref.read(appStateProvider.notifier).generateDrafts(_currentMonth, _currentYear);
+                            final msg = await ref.read(appStateProvider.notifier).generateDrafts(_currentMonth, _currentYear, branchId: widget.branchId);
                             messenger.showSnackBar(
                               SnackBar(
                                 content: Text(msg),

@@ -148,7 +148,7 @@ class AppStateNotifier extends AsyncNotifier<AppState> {
     });
   }
 
-  Future<String> generateDrafts(int month, int year) async {
+  Future<String> generateDrafts(int month, int year, {required String branchId}) async {
     final api = ref.read(apiServiceProvider);
     final msg = await api.generateDrafts(month, year);
     

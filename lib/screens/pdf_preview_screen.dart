@@ -9,7 +9,9 @@ import '../widgets/background_scaffold.dart';
 
 class PdfPreviewScreen extends ConsumerWidget {
   final String branchId;
-  const PdfPreviewScreen({super.key, required this.branchId});
+  final int month;
+  final int year;
+  const PdfPreviewScreen({super.key, required this.branchId, required this.month, required this.year});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,8 +22,6 @@ class PdfPreviewScreen extends ConsumerWidget {
       error: (e, s) => GlassErrorPlaceholder(message: 'PDF GENERATION FAILED', error: e),
       data: (appState) {
         final office = appState.offices.firstWhere((o) => o.id == branchId);
-        final currentMonth = DateTime.now().month;
-        final currentYear = DateTime.now().year;
 
         final branchLoanIds = appState.customers
             .where((c) => c.officeId == branchId)
@@ -29,8 +29,15 @@ class PdfPreviewScreen extends ConsumerWidget {
             .toSet();
 
         final branchDrafts = appState.monthlyRecoveries
-            .where((d) => d.month == currentMonth && d.year == currentYear && branchLoanIds.contains(d.loanId))
+            .where((d) => d.month == month && d.year == year && branchLoanIds.contains(d.loanId))
             .toList();
+
+        if (branchDrafts.isEmpty) {
+          return GlassErrorPlaceholder(
+            message: 'NO DRAFTS FOUND',
+            error: 'No recoveries generated for ${office.name} in $month/$year',
+          );
+        }
 
         return BackgroundScaffold(
           appBar: AppBar(
@@ -43,35 +50,37 @@ class PdfPreviewScreen extends ConsumerWidget {
               onPressed: () => context.pop(),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: PdfPreview(
-                      build: (format) => PdfService.generateRecoveryPdf(
-                        office: office,
-                        month: currentMonth,
-                        year: currentYear,
-                        drafts: branchDrafts,
-                        customers: appState.customers,
-                        loans: appState.loans,
-                      ),
-                      allowPrinting: true,
-                      allowSharing: true,
-                      canChangePageFormat: false,
-                      canChangeOrientation: false,
-                      previewPageMargin: const EdgeInsets.all(0),
-                      pdfPreviewPageDecoration: const BoxDecoration(
-                        color: Colors.transparent,
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: PdfPreview(
+                        build: (format) => PdfService.generateRecoveryPdf(
+                          office: office,
+                          month: month,
+                          year: year,
+                          drafts: branchDrafts,
+                          customers: appState.customers,
+                          loans: appState.loans,
+                        ),
+                        allowPrinting: true,
+                        allowSharing: true,
+                        canChangePageFormat: false,
+                        canChangeOrientation: false,
+                        previewPageMargin: const EdgeInsets.all(0),
+                        pdfPreviewPageDecoration: const BoxDecoration(
+                          color: Colors.transparent,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );

@@ -104,8 +104,13 @@ def create_recovery(recovery: schemas.MonthlyRecoveryBase, db: Session = Depends
     return db_recovery
 
 @app.post("/recoveries/generate")
-def generate_drafts(month: int, year: int, db: Session = Depends(get_db)):
-    loans = db.query(models.Loan).filter(models.Loan.status.in_(['Active', 'ACTIVE'])).all()
+def generate_drafts(month: int, year: int, office_id: str = None, db: Session = Depends(get_db)):
+    query = db.query(models.Loan).filter(models.Loan.status.in_(['Active', 'ACTIVE']))
+    
+    if office_id:
+        query = query.join(models.Customer).filter(models.Customer.office_id == office_id)
+        
+    loans = query.all()
     created_drafts = []
     
     for loan in loans:
@@ -117,13 +122,22 @@ def generate_drafts(month: int, year: int, db: Session = Depends(get_db)):
         ).first()
         
         if not existing:
+            # Calculation logic: Interest = 1% of Outstanding, Principal = Base EMI - Interest
+            interest = round(loan.principal_outstanding * 0.01, 2)
+            principal_due = round(loan.base_emi_amount - interest, 2)
+            
+            # Ensure principal isn't negative (edge case where EMI is very low)
+            if principal_due < 0:
+                principal_due = loan.base_emi_amount
+                interest = 0.0
+
             new_draft = models.MonthlyRecovery(
                 id=str(uuid.uuid4()),
                 loan_id=loan.id,
                 month=month,
                 year=year,
-                principal_due=loan.base_emi_amount, # Setting base EMI to principal by default
-                interest=0.0,
+                principal_due=principal_due,
+                interest=interest,
                 penal_interest=0.0,
                 other_charges=0.0,
             )
@@ -131,7 +145,7 @@ def generate_drafts(month: int, year: int, db: Session = Depends(get_db)):
             created_drafts.append(new_draft)
     
     db.commit()
-    return {"message": f"{len(created_drafts)} drafts generated"}
+    return {"message": f"{len(created_drafts)} drafts generated for the selected unit."}
 
 @app.patch("/recoveries/{recovery_id}", response_model=schemas.MonthlyRecovery)
 def update_recovery(
