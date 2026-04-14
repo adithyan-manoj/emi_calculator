@@ -3,13 +3,13 @@ import uuid
 import os
 import sys
 
-# Add the parent directory to sys.path so we can import from app
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
-
-from app.database import SessionLocal
-from app import models
+from database import SessionLocal, engine
+import models
 
 def populate_db():
+    # Create tables in the new database if they don't exist
+    print("Ensuring tables exist...")
+    models.Base.metadata.create_all(bind=engine)
     # Load extracted data
     data_path = os.path.join(os.path.dirname(__file__), "..", "extracted_data.json")
     with open(data_path, 'r') as f:

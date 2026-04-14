@@ -10,14 +10,14 @@ class ApiService {
   late final Dio _dio;
   
   // Using 127.0.0.1 because adb reverse maps the phone directly to the PC
-  final String _baseUrl = 'http://192.168.1.74:8000';
-
+  // final String _baseUrl = 'http://192.168.1.74:8000';
+  final String _baseUrl = 'https://emi-calculator-q4hs.onrender.com/';
 
   ApiService() {
     _dio = Dio(BaseOptions(
       baseUrl: _baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(seconds: 60),
     ));
   }
 
