@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from fastapi import HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -23,8 +24,12 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def get_db():
-    if "dummy" in SQLALCHEMY_DATABASE_URL:
-        raise ValueError("Database connection failed: DATABASE_URL environment variable is missing.")
+    if not SQLALCHEMY_DATABASE_URL or "dummy" in SQLALCHEMY_DATABASE_URL:
+        print("ERROR: DATABASE_URL is missing or invalid!")
+        raise HTTPException(
+            status_code=500, 
+            detail="Database connection not configured on Render. Please check Environment Variables."
+        )
     db = SessionLocal()
     try:
         yield db

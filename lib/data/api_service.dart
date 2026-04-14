@@ -23,47 +23,47 @@ class ApiService {
 
   // --- Offices ---
   Future<List<Office>> getOffices() async {
-    final response = await _dio.get('/offices/');
+    final response = await _dio.get('offices/');
     return (response.data as List).map((e) => Office.fromJson(e)).toList();
   }
 
   Future<Office> createOffice(Office office) async {
-    final response = await _dio.post('/offices/', data: office.toJson());
+    final response = await _dio.post('offices/', data: office.toJson());
     return Office.fromJson(response.data);
   }
 
   Future<void> deleteOffice(String officeId) async {
-    await _dio.delete('/offices/$officeId');
+    await _dio.delete('offices/$officeId');
   }
 
   // --- Customers ---
   Future<List<Customer>> getCustomers({String? officeId}) async {
-    final response = await _dio.get('/customers/', queryParameters: officeId != null ? {'office_id': officeId} : null);
+    final response = await _dio.get('customers/', queryParameters: officeId != null ? {'office_id': officeId} : null);
     return (response.data as List).map((e) => Customer.fromJson(e)).toList();
   }
 
   Future<Customer> createCustomer(Customer customer) async {
-    final response = await _dio.post('/customers/', data: customer.toJson());
+    final response = await _dio.post('customers/', data: customer.toJson());
     return Customer.fromJson(response.data);
   }
 
   Future<void> deleteCustomer(String customerId) async {
-    await _dio.delete('/customers/$customerId');
+    await _dio.delete('customers/$customerId');
   }
 
   // --- Loans ---
   Future<List<Loan>> getLoans({String? customerId}) async {
-    final response = await _dio.get('/loans/', queryParameters: customerId != null ? {'customer_id': customerId} : null);
+    final response = await _dio.get('loans/', queryParameters: customerId != null ? {'customer_id': customerId} : null);
     return (response.data as List).map((e) => Loan.fromJson(e)).toList();
   }
 
   Future<Loan> createLoan(Loan loan) async {
-    final response = await _dio.post('/loans/', data: loan.toJson());
+    final response = await _dio.post('loans/', data: loan.toJson());
     return Loan.fromJson(response.data);
   }
 
   Future<void> deleteLoan(String loanId) async {
-    await _dio.delete('/loans/$loanId');
+    await _dio.delete('loans/$loanId');
   }
 
   // --- Recoveries ---
@@ -72,7 +72,7 @@ class ApiService {
     if (month != null) query['month'] = month;
     if (year != null) query['year'] = year;
     
-    final response = await _dio.get('/recoveries/', queryParameters: query);
+    final response = await _dio.get('recoveries/', queryParameters: query);
     return (response.data as List).map((e) => MonthlyRecovery.fromJson(e)).toList();
   }
 
@@ -81,7 +81,7 @@ class ApiService {
     final id = officeId ?? branchId;
     if (id != null) query['office_id'] = id;
     
-    final response = await _dio.post('/recoveries/generate', queryParameters: query);
+    final response = await _dio.post('recoveries/generate', queryParameters: query);
     return response.data['message'] as String;
   }
 
@@ -96,7 +96,7 @@ class ApiService {
     if (others != null) query['other_charges'] = others;
 
     final response = await _dio.patch(
-      '/recoveries/$id', 
+      'recoveries/$id', 
       queryParameters: query
     );
     return MonthlyRecovery.fromJson(response.data);

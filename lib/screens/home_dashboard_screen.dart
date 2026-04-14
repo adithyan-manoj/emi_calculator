@@ -32,7 +32,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'The app could not reach the backend. Ensure your phone and PC are on the same Wi-Fi and that the backend is running.',
+                    'The app could not reach the backend. Ensure you have an active internet connection and that the Render service is not sleeping.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
                   ),
